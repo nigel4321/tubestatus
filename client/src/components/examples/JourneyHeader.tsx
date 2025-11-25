@@ -7,7 +7,9 @@ export default function JourneyHeaderExample() {
       to="Chancery Lane"
       lastUpdated={new Date()}
       onRefresh={() => console.log("Refresh triggered")}
+      onSwap={() => console.log("Swap direction triggered")}
       isRefreshing={false}
+      canRefresh={true}
     />
   );
 }

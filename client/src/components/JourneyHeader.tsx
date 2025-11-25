@@ -1,4 +1,4 @@
-import { ArrowRight, RefreshCw } from "lucide-react";
+import { ArrowRight, RefreshCw, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface JourneyHeaderProps {
@@ -6,7 +6,9 @@ interface JourneyHeaderProps {
   to: string;
   lastUpdated?: Date;
   onRefresh?: () => void;
+  onSwap?: () => void;
   isRefreshing?: boolean;
+  canRefresh?: boolean;
 }
 
 export default function JourneyHeader({
@@ -14,7 +16,9 @@ export default function JourneyHeader({
   to,
   lastUpdated,
   onRefresh,
+  onSwap,
   isRefreshing = false,
+  canRefresh = true,
 }: JourneyHeaderProps) {
   return (
     <header className="border-b bg-card">
@@ -27,11 +31,22 @@ export default function JourneyHeader({
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-base font-semibold flex items-center gap-2 flex-wrap">
-                <span className="truncate">{from}</span>
-                <ArrowRight className="w-4 h-4 flex-shrink-0" />
-                <span className="truncate">{to}</span>
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-semibold flex items-center gap-2 flex-wrap">
+                  <span className="truncate">{from}</span>
+                  <ArrowRight className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{to}</span>
+                </h1>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={onSwap}
+                  data-testid="button-swap-direction"
+                  className="flex-shrink-0 h-7 w-7"
+                >
+                  <ArrowLeftRight className="w-3.5 h-3.5" />
+                </Button>
+              </div>
               {lastUpdated && (
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Updated {lastUpdated.toLocaleTimeString()}
@@ -43,7 +58,7 @@ export default function JourneyHeader({
             size="icon"
             variant="ghost"
             onClick={onRefresh}
-            disabled={isRefreshing}
+            disabled={isRefreshing || !canRefresh}
             data-testid="button-refresh"
             className="flex-shrink-0"
           >

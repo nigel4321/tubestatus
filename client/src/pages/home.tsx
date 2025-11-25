@@ -147,6 +147,10 @@ export default function HomePage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [routes, setRoutes] = useState(MOCK_ROUTES);
+  const [from, setFrom] = useState("High Barnet");
+  const [to, setTo] = useState("Chancery Lane");
+  const [lastRefreshTime, setLastRefreshTime] = useState<number>(Date.now());
+  const [canRefresh, setCanRefresh] = useState(true);
 
   // TODO: remove mock functionality - simulate initial load
   useEffect(() => {
@@ -159,14 +163,37 @@ export default function HomePage() {
   // TODO: remove mock functionality - simulate auto-refresh every 2 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      handleRefresh();
+      if (canRefresh) {
+        handleRefresh();
+      }
     }, 120000);
     return () => clearInterval(interval);
-  }, []);
+  }, [canRefresh]);
+
+  // Rate limiting - re-enable refresh button after 30 seconds
+  useEffect(() => {
+    if (!canRefresh) {
+      const timer = setTimeout(() => {
+        setCanRefresh(true);
+      }, 30000);
+      return () => clearTimeout(timer);
+    }
+  }, [canRefresh]);
 
   // TODO: remove mock functionality - this will call real TfL API
   const handleRefresh = () => {
+    const now = Date.now();
+    const timeSinceLastRefresh = now - lastRefreshTime;
+    
+    // Enforce 30 second rate limit
+    if (timeSinceLastRefresh < 30000) {
+      console.log(`Please wait ${Math.ceil((30000 - timeSinceLastRefresh) / 1000)} seconds before refreshing again`);
+      return;
+    }
+
     setIsRefreshing(true);
+    setCanRefresh(false);
+    setLastRefreshTime(now);
     console.log("Refreshing journey data from TfL API...");
     
     setTimeout(() => {
@@ -177,14 +204,28 @@ export default function HomePage() {
     }, 1000);
   };
 
+  const handleSwapDirection = () => {
+    console.log(`Swapping direction: ${to} to ${from}`);
+    setFrom(to);
+    setTo(from);
+    // In real implementation, this would fetch new route data for the reversed direction
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setRoutes([...MOCK_ROUTES]);
+    }, 1000);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <JourneyHeader
-        from="High Barnet"
-        to="Chancery Lane"
+        from={from}
+        to={to}
         lastUpdated={lastUpdated}
         onRefresh={handleRefresh}
+        onSwap={handleSwapDirection}
         isRefreshing={isRefreshing}
+        canRefresh={canRefresh}
       />
       
       <main className="max-w-2xl mx-auto px-4 py-6">
