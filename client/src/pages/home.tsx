@@ -1,0 +1,207 @@
+import { useState, useEffect } from "react";
+import JourneyHeader from "@/components/JourneyHeader";
+import RouteCard from "@/components/RouteCard";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
+
+// TODO: remove mock functionality - this will be replaced with real TfL API data
+const MOCK_ROUTES = [
+  {
+    duration: 35,
+    departureTime: "Now",
+    arrivalTime: "15:05",
+    legs: [
+      {
+        mode: "tube" as const,
+        lineName: "Northern",
+        direction: "Edgware",
+        from: "High Barnet",
+        to: "Tottenham Court Road",
+        duration: 28,
+        stops: 14,
+      },
+      {
+        mode: "walking" as const,
+        from: "Tottenham Court Road",
+        to: "Tottenham Court Road (Central)",
+        duration: 4,
+        distance: 200,
+      },
+      {
+        mode: "tube" as const,
+        lineName: "Central",
+        direction: "Ealing Broadway",
+        from: "Tottenham Court Road",
+        to: "Chancery Lane",
+        duration: 3,
+        stops: 1,
+      },
+    ],
+    disruptions: [
+      {
+        severity: "info" as const,
+        message: "Good service on Northern and Central lines",
+      },
+    ],
+    isFastest: true,
+  },
+  {
+    duration: 42,
+    departureTime: "Now",
+    arrivalTime: "15:12",
+    legs: [
+      {
+        mode: "tube" as const,
+        lineName: "Northern",
+        direction: "Edgware",
+        from: "High Barnet",
+        to: "King's Cross St. Pancras",
+        duration: 24,
+        stops: 12,
+      },
+      {
+        mode: "walking" as const,
+        from: "King's Cross St. Pancras",
+        to: "King's Cross St. Pancras (Piccadilly)",
+        duration: 5,
+        distance: 250,
+      },
+      {
+        mode: "tube" as const,
+        lineName: "Piccadilly",
+        direction: "Cockfosters",
+        from: "King's Cross St. Pancras",
+        to: "Holborn",
+        duration: 4,
+        stops: 2,
+      },
+      {
+        mode: "walking" as const,
+        from: "Holborn",
+        to: "Chancery Lane",
+        duration: 9,
+        distance: 450,
+      },
+    ],
+    disruptions: [],
+    isFastest: false,
+  },
+  {
+    duration: 38,
+    departureTime: "14:35",
+    arrivalTime: "15:13",
+    legs: [
+      {
+        mode: "tube" as const,
+        lineName: "Northern",
+        direction: "Edgware",
+        from: "High Barnet",
+        to: "Camden Town",
+        duration: 15,
+        stops: 8,
+      },
+      {
+        mode: "walking" as const,
+        from: "Camden Town",
+        to: "Camden Town (Northern Bank)",
+        duration: 3,
+        distance: 100,
+      },
+      {
+        mode: "tube" as const,
+        lineName: "Northern",
+        direction: "Morden",
+        from: "Camden Town",
+        to: "Tottenham Court Road",
+        duration: 13,
+        stops: 6,
+      },
+      {
+        mode: "walking" as const,
+        from: "Tottenham Court Road",
+        to: "Tottenham Court Road (Central)",
+        duration: 4,
+        distance: 200,
+      },
+      {
+        mode: "tube" as const,
+        lineName: "Central",
+        direction: "Ealing Broadway",
+        from: "Tottenham Court Road",
+        to: "Chancery Lane",
+        duration: 3,
+        stops: 1,
+      },
+    ],
+    disruptions: [
+      {
+        severity: "warning" as const,
+        message: "Minor delays on Northern line southbound due to earlier signal failure",
+      },
+    ],
+    isFastest: false,
+  },
+];
+
+export default function HomePage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [routes, setRoutes] = useState(MOCK_ROUTES);
+
+  // TODO: remove mock functionality - simulate initial load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // TODO: remove mock functionality - simulate auto-refresh every 2 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      handleRefresh();
+    }, 120000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // TODO: remove mock functionality - this will call real TfL API
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    console.log("Refreshing journey data from TfL API...");
+    
+    setTimeout(() => {
+      setLastUpdated(new Date());
+      setIsRefreshing(false);
+      // In real implementation, this would update routes with fresh API data
+      setRoutes([...MOCK_ROUTES]);
+    }, 1000);
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <JourneyHeader
+        from="High Barnet"
+        to="Chancery Lane"
+        lastUpdated={lastUpdated}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
+      />
+      
+      <main className="max-w-2xl mx-auto px-4 py-6">
+        {isLoading ? (
+          <LoadingSkeleton />
+        ) : (
+          <div className="space-y-4">
+            {routes.map((route, index) => (
+              <RouteCard key={index} {...route} />
+            ))}
+          </div>
+        )}
+        
+        <footer className="mt-8 text-center text-xs text-muted-foreground pb-6">
+          Powered by TfL Open Data
+        </footer>
+      </main>
+    </div>
+  );
+}
