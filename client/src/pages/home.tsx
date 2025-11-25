@@ -204,16 +204,57 @@ export default function HomePage() {
     }, 1000);
   };
 
+  // Helper function to reverse a route's legs
+  const reverseRoute = (route: typeof MOCK_ROUTES[0]) => {
+    const reversedLegs = [...route.legs].reverse().map(leg => {
+      const reversedLeg: any = {
+        ...leg,
+        from: leg.to,
+        to: leg.from,
+      };
+      
+      // Only update direction for tube legs
+      if (leg.mode === "tube" && leg.direction) {
+        reversedLeg.direction = getOppositeDirection(leg.direction);
+      }
+      
+      return reversedLeg;
+    });
+
+    return {
+      ...route,
+      legs: reversedLegs,
+    };
+  };
+
+  // Helper to get opposite direction for tube lines
+  const getOppositeDirection = (direction: string): string => {
+    const opposites: Record<string, string> = {
+      "Edgware": "Morden",
+      "Morden": "Edgware",
+      "Ealing Broadway": "Epping",
+      "Epping": "Ealing Broadway",
+      "Cockfosters": "Heathrow",
+      "Heathrow": "Cockfosters",
+      "High Barnet": "Edgware",
+    };
+    return opposites[direction] || direction;
+  };
+
   const handleSwapDirection = () => {
     console.log(`Swapping direction: ${to} to ${from}`);
-    setFrom(to);
-    setTo(from);
-    // In real implementation, this would fetch new route data for the reversed direction
+    const newFrom = to;
+    const newTo = from;
+    setFrom(newFrom);
+    setTo(newTo);
+    
+    // Reverse all routes
     setIsLoading(true);
     setTimeout(() => {
+      const reversedRoutes = routes.map(reverseRoute);
+      setRoutes(reversedRoutes);
       setIsLoading(false);
-      setRoutes([...MOCK_ROUTES]);
-    }, 1000);
+    }, 800);
   };
 
   return (
