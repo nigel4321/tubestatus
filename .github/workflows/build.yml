@@ -13,6 +13,7 @@ jobs:
       contents: write
       packages: write
       issues: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
@@ -33,9 +34,11 @@ jobs:
         run: npm run build
 
       - name: Run semantic-release
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          branch: main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Get latest git tag
         id: get_tag
