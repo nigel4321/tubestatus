@@ -10,3 +10,8 @@ jobs:
     uses: ./.github/workflows/build.yml
     if: github.ref == 'refs/heads/master'
     needs: unittest
+    permissions:
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
