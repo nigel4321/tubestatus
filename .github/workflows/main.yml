@@ -1,4 +1,4 @@
-name: [R] Test and build
+name: "[R] Test and build"
 
 on:
   push:
